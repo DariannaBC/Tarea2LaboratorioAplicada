@@ -37,135 +37,49 @@ namespace Tarea2LaboratorioAplicada.UI.Registros
 
         }
 
-        public static bool Guardar(Roles roles)
+        private void Limpiar()
         {
-            if (!Existe(roles.RolId)) //Si no existe insertamos
+            DescripcionTextBox.Clear();
+            IDTextBox.Clear();
+        }
+
+        private void Nuevo_Click(object sender, RoutedEventArgs e)
+        {
+            Limpiar();
+        }
+
+        private void Almacenar_Click(object sender, RoutedEventArgs e)
+        {
+            Roles roles;
+            bool paso = false;
+            if (!Validar())
             {
-                return Insertar(roles);
+                return;
+            }
+            roles = LlenarClase();
+            paso = RolesBLL.Guardar(roles);
+
+            if (!ExisteEnLaBaseDeDatos())
+            {
+                Limpiar();
+                MessageBox.Show("Usuario guardado correctamente", "Guardado", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             else
             {
-                return Modificar(roles);
+                Limpiar();
+                MessageBox.Show("Usuario modificado correctamente", "Guardado", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
-
-
-        private static bool Insertar(Roles roles)
+        private void Borrar_Click(object sender, RoutedEventArgs e)
         {
-            bool paso = false;
-            Contexto contexto = new Contexto();
-
-
-
-            try
-            {
-                //Agregar la entidad que se desea insertar al contexto
-                contexto.Roles.Add(roles);
-                paso = contexto.SaveChanges() > 0;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-            finally
-            {
-                contexto.Dispose();
-            }
-
-
-
-            return paso;
-        }
-
-
-
-        private static bool Modificar(Roles roles)
-        {
-            bool paso = false;
-            Contexto contexto = new Contexto();
-
-
-
-            try
-            {
-                //Marcar la entidad como modificada para que
-                //El contexto sepa como proceder
-                contexto.Entry(roles).State = EntityState.Modified;
-                paso = contexto.SaveChanges() > 0;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-            finally
-            {
-                contexto.Dispose();
-            }
-
-
-
-            return paso;
-        }
-
-
-
-        public static bool Eliminar(int id)
-        {
-            bool paso = false;
-            Contexto contexto = new Contexto();
-
-
-
-            try
-            {
-                //Buscar la entidad que se desea eliminar
-                var roles = contexto.Roles.Find(id);
-
-
-
-                if (roles != null)
-                {
-                    contexto.Roles.Remove(roles); //Remover la entidad
-                    paso = contexto.SaveChanges() > 0;
-                }
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-            finally
-            {
-                contexto.Dispose();
-            }
-
-
-
-            return paso;
-        }
-
-
-
-        public static Roles Buscar(int id)
-        {
-            Contexto contexto = new Contexto();
-            Roles roles;
-
-
-
-            try
-            {
-                roles = contexto.Roles.Find(id);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-            finally
-            {
-                contexto.Dispose();
-            }
-            return roles;
+            int id;
+            int.TryParse(IDTextBox.Text, out id);
+            Limpiar();
+            if (RolesBLL.Eliminar(id))
+                MessageBox.Show("Usuario eliminado correctamente", "Proceso exitoso", MessageBoxButton.OK, MessageBoxImage.Information);
+            else
+                MessageBox.Show("ID no existente");
         }
 
 
@@ -221,6 +135,43 @@ namespace Tarea2LaboratorioAplicada.UI.Registros
 
 
             return encontrado;
+        }
+
+
+        private Roles LlenarClase()
+        {
+            Roles roles = new Roles();
+            roles.RolId = int.Parse(IDTextBox.Text);
+            roles.Descripcion = DescripcionTextBox.Text;
+
+            return roles;
+        }
+
+        private void LlenarCampos(Roles roles)
+        {
+            IDTextBox.Text = roles.RolId.ToString();
+            DescripcionTextBox.Text = roles.Descripcion;
+        }
+
+        private bool ExisteEnLaBaseDeDatos()
+        {
+            Roles roles = RolesBLL.Buscar(Utilidades.ToInt(IDTextBox.Text));
+
+            return (roles != null);
+        }
+
+        private bool Validar()
+        {
+            bool paso = true;
+
+            if (RolesBLL.ExisteDescripcion(DescripcionTextBox.Text))
+            {
+                MessageBox.Show("Mensaje repetido");
+                DescripcionTextBox.Focus();
+                paso = false;
+            }
+
+            return paso;
         }
     }
 }

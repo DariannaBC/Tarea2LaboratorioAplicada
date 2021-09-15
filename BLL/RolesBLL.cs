@@ -198,5 +198,27 @@ namespace Tarea2LaboratorioAplicada.BLL
 
             return encontrado;
         }
+
+        public static bool ExisteDescripcion(string descrip)
+        {
+            Contexto contexto = new Contexto();
+            bool encontrado = false;
+            try
+            {
+                encontrado = contexto.Roles.Any(e => e.Descripcion == descrip);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                contexto.Dispose();
+            }
+
+
+
+            return encontrado;
+        }
     }
 }

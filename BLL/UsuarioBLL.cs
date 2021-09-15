@@ -17,6 +17,7 @@ namespace Tarea2LaboratorioAplicada.BLL
             if (!Existe(usuario.id)) //Si no existe insertamos
             {
                 return Insertar(usuario);
+
             }
             else
             {
@@ -85,7 +86,7 @@ namespace Tarea2LaboratorioAplicada.BLL
 
 
 
-        private static bool Eliminar(int id)
+        public static bool Eliminar(int id)
         {
             bool paso = false;
             Contexto contexto = new Contexto();
@@ -173,16 +174,39 @@ namespace Tarea2LaboratorioAplicada.BLL
 
 
 
+       
+
         public static bool Existe(int id)
         {
             Contexto contexto = new Contexto();
             bool encontrado = false;
-
-
-
             try
             {
                 encontrado = contexto.Usuario.Any(e => e.id == id);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                contexto.Dispose();
+            }
+
+
+
+            return encontrado;
+        }
+
+
+
+        public static bool ExisteAlias(string buscaralias)
+        {
+            Contexto contexto = new Contexto();
+            bool encontrado = false;
+            try
+            {
+                encontrado = contexto.Usuario.Any(e => e.alias == buscaralias);
             }
             catch (Exception)
             {

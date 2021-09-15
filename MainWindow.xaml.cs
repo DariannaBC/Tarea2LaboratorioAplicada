@@ -34,17 +34,28 @@ namespace Tarea2LaboratorioAplicada
         private Usuario usuario = new Usuario();
         private void IDButton_Click(object sender, RoutedEventArgs e)
         {
-            var usuario = UsuarioBLL.Buscar(Utilidades.ToInt(IDTextBox.Text));
+            int id;
+            Usuario usuario = new Usuario();
+            int.TryParse(IDTextBox .Text, out id);
+
+
+
+           
+
+
+
+            usuario = UsuarioBLL.Buscar(id);
 
 
 
             if (usuario != null)
             {
-                this.usuario = usuario;
+                MessageBox.Show("Persona Encotrada");
+                LlenarCampos(usuario);
             }
             else
             {
-                this.usuario = new Usuario();
+                MessageBox.Show("Persona no Encontrada");
             }
 
 
@@ -63,23 +74,26 @@ namespace Tarea2LaboratorioAplicada
 
         private void GuardarButton_Click(object sender, RoutedEventArgs e)
         {
+            Usuario usuario;
+            bool paso = false;
             if (!Validar())
+            {
                 return;
-
-
-
-            var paso = UsuarioBLL.Guardar(usuario);
+            }
+            usuario = LlenarClase();
+            paso = UsuarioBLL.Guardar(usuario);
 
 
 
             if (paso)
             {
                 Limpiar();
-                MessageBox.Show("Operacion Exitosa!", "Exito", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Transaccion exitosa", "Exito", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             else
             {
-                MessageBox.Show("Operacion Fallida!", "Fallo", MessageBoxButton.OK, MessageBoxImage.Error);
+                Limpiar();
+                MessageBox.Show("Transaccion fallida", "Fallo", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
@@ -87,35 +101,20 @@ namespace Tarea2LaboratorioAplicada
 
         private void EliminarButton_Click(object sender, RoutedEventArgs e)
         {
-            if (RolesBLL.Eliminar(Utilidades.ToInt(IDTextBox.Text)))
-            {
-                Limpiar();
-                MessageBox.Show("Registro Eliminado", "Exito", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+           
+            int id;
+            int.TryParse(IDTextBox.Text, out id);
+            Limpiar();
+            if (UsuarioBLL.Eliminar(id))
+                MessageBox.Show("Usuario eliminado correctamente", "Proceso exitoso", MessageBoxButton.OK, MessageBoxImage.Information);
             else
-            {
-                MessageBox.Show("No fue posible eliminar", "Fallo", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+               MessageBox.Show( "ID no existente");
         }
 
 
 
-        private bool Validar()
-        {
-            bool esValido = true;
+      
 
-
-
-            if (NombresTextBox.Text.Length == 0)
-            {
-                esValido = false;
-                MessageBox.Show("Transaccion Fallida", "Fallo", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
-
-
-
-            return esValido;
-        }
 
 
 
@@ -131,5 +130,78 @@ namespace Tarea2LaboratorioAplicada
             NivelCombo.Text = "";
         }
 
+        public static bool Existe(int id)
+        {
+            Contexto contexto = new Contexto();
+            bool encontrado = false;
+
+
+
+            try
+            {
+                encontrado = contexto.Usuario.Any(e => e.id == id);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                contexto.Dispose();
+            }
+
+
+
+            return encontrado;
+        }
+
+
+        private Usuario LlenarClase()
+        {
+            Usuario usuario = new Usuario();
+            usuario.id = int.Parse(IDTextBox.Text);
+            usuario.nombres = NombresTextBox.Text;
+            usuario.alias = AliasTextBox.Text;
+            usuario.clave = ClaveTextBox.Text;
+            usuario.email = EmailTextBox.Text;
+            usuario.costo = int.Parse(CostoTextBox.Text);
+
+            return usuario;
+        }
+
+        private void LlenarCampos(Usuario usuario)
+        {
+            IDTextBox.Text = usuario.id.ToString();
+            NombresTextBox.Text = usuario.nombres;
+            AliasTextBox.Text = usuario.alias;
+            ClaveTextBox.Text = usuario.clave;
+            ConfClaveTextBox.Text = usuario.clave;
+            EmailTextBox.Text = usuario.email;
+            CostoTextBox.Text = usuario.costo.ToString();
+        }
+
+        private bool ExisteEnLaBaseDeDatos()
+        {
+            Usuario usuario = UsuarioBLL.Buscar(Utilidades.ToInt(IDTextBox.Text));
+
+            return (usuario != null);
+        }
+
+
+        private bool Validar()
+        {
+            bool paso = true;
+
+            if (UsuarioBLL.ExisteAlias(AliasTextBox.Text))
+            {
+                MessageBox.Show("Mensaje repetido");
+                NombresTextBox.Focus();
+                paso = false;
+            }
+
+            return paso;
+        }
     }
 }
+    
+

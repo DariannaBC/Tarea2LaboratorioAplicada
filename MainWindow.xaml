@@ -20,7 +20,9 @@
                 <Label Content="Alias"/>
                 <TextBox x:Name="AliasTextBox" Height="20" Width="110"/>
                 <Label Content="Nivel" Margin="20,0"/>
-                <ComboBox  IsEditable="True" IsReadOnly="True" x:Name="NivelCombo" Text="Administrador" Width="100"/>
+                <ComboBox Name="NivelComboBox" IsEditable="True" IsReadOnly="True" Text="Administrador" Background="Gray">
+                <ComboBoxItem Content="Administrador"/>
+                </ComboBox>
 
             </StackPanel>
 
